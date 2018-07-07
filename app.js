@@ -14,7 +14,6 @@ client.on("ready", () => {
     fs.readFile(__dirname + "/kaomojis.txt", "utf8", (err, contents) => {
         if(err) throw err;
         kaomojis = contents.split("\n");
-        console.log(kaomojis);
     });
 });
 
@@ -26,6 +25,7 @@ client.on("message", async msg => {
     // Split the command from its arguments
     const args = msg.content.slice(prefix.length).trim().split(/ +/g);
     const cmd = args.shift().toLowerCase();
+    console.log(`Received command: ${cmd}`);
 
     // Process the command
     switch(cmd){

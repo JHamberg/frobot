@@ -7,14 +7,26 @@ const prefix = process.env.PREFIX;
 let kaomojis = [];
 
 client.on("ready", () => {
-    console.log(`Bot started with ${client.users.size} users!`);
-    client.user.setActivity(process.env.STATUS);
+    console.log(`Bot started with ${client.users.size} users on ${client.guilds.size} servers!`);
+    client.user.setActivity(process.env.STATUS, {
+        type: "WATCHING"
+    });
 
     // Load available kaomojis
     fs.readFile(__dirname + "/kaomojis.txt", "utf8", (err, contents) => {
         if(err) throw err;
         kaomojis = contents.split("\n");
     });
+});
+
+client.on("guildCreate", guild => {
+    console.log(`Bot joined ${guild.name} with ${guild.memberCount} members`);
+    console.log(`Now serving ${client.guilds.size} servers`);
+});
+  
+client.on("guildDelete", guild => {
+    console.log(`Bot left ${guild.name}`);
+    console.log(`Now serving ${client.guilds.size} servers`);
 });
 
 client.on("message", async msg => {
@@ -28,7 +40,7 @@ client.on("message", async msg => {
     console.log(`Received command: ${cmd}`);
 
     // Process the command
-    switch(cmd){
+    switch(cmd) {
         case "list":
             const list = kaomojis.join("\n");
             msg.channel.send(`Available kaomojis:\`\`\`\n${list}\n\`\`\``);

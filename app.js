@@ -2,7 +2,15 @@ const Discord = require('discord.js');
 const fs = require("fs");
 const {promisify} = require('util');
 
-const readdir = promisify(fs.readdir);
+// Extended fs with promise functionality
+const fsp = {
+    readdir: promisify(fs.readdir),
+    mkdir: promisify(fs.mkdir),
+    exists: promisify(fs.exists),
+    readFile: promisify(fs.readFile),
+    open: promisify(fs.open),
+    close: promisify(fs.close)
+}
 
 // Load environment variables from .env file
 require('dotenv').config();
@@ -10,14 +18,16 @@ require('dotenv').config();
 const client = new Discord.Client();
 const prefix = process.env.PREFIX;
 let commands = [];
+let guildcommands = [];
 
+// Execute when bot is loaded
 client.on("ready", async () => {
     console.log(`Bot started with ${client.users.size} users on ${client.guilds.size} servers!`);
     client.user.setActivity(process.env.STATUS, {type: "WATCHING"});
 
     // Load commands dynamically from respective files 
     const dirname = `${__dirname}/commands`;
-    const files = await readdir(dirname);
+    const files = await fsp.readdir(dirname);
     files.forEach(file => {
         const obj = require(`${dirname}/${file}`);
         const command = (...args) => obj.run(...args);
@@ -26,9 +36,23 @@ client.on("ready", async () => {
         command.aliases.forEach(alias => {
             commands[alias] = command;
         })
-    }); 
-});
+    });
 
+    // Load guild specific custom commands
+    const guilddir = `${__dirname}/guild_commands`;
+    let exists = await fsp.exists(guilddir);
+    if(!exists) await fsp.mkdir(guilddir);
+
+    client.guilds.forEach(async guild => {
+        const guildfile = `${guilddir}/${guild.name}-${guild.id}`;
+        let exists = await fsp.exists(guildfile);
+        if(!exists) {
+            const fd = await fsp.open(guildfile, "w");
+            await fsp.close(fd);
+        }
+    });
+});
+// Execute on message
 client.on("message", async msg => {
     // Ignore messages from other bots and/or without prefix
     if(msg.author.bot) return;

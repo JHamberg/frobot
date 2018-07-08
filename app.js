@@ -45,13 +45,18 @@ client.on("ready", async () => {
 
     client.guilds.forEach(async guild => {
         const guildfile = `${guilddir}/${guild.name}-${guild.id}`;
-        let exists = await fsp.exists(guildfile);
+        const exists = await fsp.exists(guildfile);
         if(!exists) {
+            // Make sure a file exists for each guild
             const fd = await fsp.open(guildfile, "w");
             await fsp.close(fd);
         }
+        const content = await fsp.readFile(guildfile, "utf-8") || "{}";
+        const commands = JSON.parse(content);
+        guildcommands[guild.id] = commands;
     });
 });
+
 // Execute on message
 client.on("message", async msg => {
     // Ignore messages from other bots and/or without prefix
@@ -65,7 +70,18 @@ client.on("message", async msg => {
 
     // Find the command module and call it
     const command = commands[name];
-    if(command) command(msg, args, client); 
+    if(command) {
+        command(msg, args, client);
+        return;
+    }
+
+    // Check custom commands if default no found
+    const guildcommand = guildcommands[msg.channel.guild.id];
+    if(!guildcommand) return;
+    const reply = guildcommand[name];
+    if(!reply) return; 
+
+    await msg.channel.send(reply);
 });
 
 // Handle server join

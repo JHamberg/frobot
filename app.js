@@ -1,6 +1,5 @@
 const Discord = require('discord.js');
 const fs = require("fs");
-const path = require('path');
 const {promisify} = require('util');
 
 const readdir = promisify(fs.readdir);
@@ -11,40 +10,23 @@ require('dotenv').config();
 const client = new Discord.Client();
 const prefix = process.env.PREFIX;
 let commands = [];
-let kaomojis = [];
 
 client.on("ready", async () => {
     console.log(`Bot started with ${client.users.size} users on ${client.guilds.size} servers!`);
-    client.user.setActivity(process.env.STATUS, {
-        type: "WATCHING"
-    });
+    client.user.setActivity(process.env.STATUS, {type: "WATCHING"});
 
+    // Load commands dynamically from respective files 
     const dirname = `${__dirname}/commands`;
-
-    let files = await readdir(dirname);
+    const files = await readdir(dirname);
     files.forEach(file => {
         const obj = require(`${dirname}/${file}`);
         const command = (...args) => obj.run(...args);
         Object.assign(command, obj);
         delete command.run; // Run is no longer needed
-        commands[command.alias] = command;
-    });
-
-    // Load available kaomojis
-    fs.readFile(__dirname + "/kaomojis.txt", "utf8", (err, content) => {
-        if(err) throw err;
-        kaomojis = content.split("\n");
-    });
-});
-
-client.on("guildCreate", guild => {
-    console.log(`Bot joined ${guild.name} with ${guild.memberCount} members`);
-    console.log(`Now serving ${client.guilds.size} servers`);
-});
-  
-client.on("guildDelete", guild => {
-    console.log(`Bot left ${guild.name}`);
-    console.log(`Now serving ${client.guilds.size} servers`);
+        command.aliases.forEach(alias => {
+            commands[alias] = command;
+        })
+    }); 
 });
 
 client.on("message", async msg => {
@@ -54,27 +36,25 @@ client.on("message", async msg => {
     
     // Split the command from its arguments
     const args = msg.content.slice(prefix.length).trim().split(/ +/g);
-    const cmd = args.shift().toLowerCase();
-    console.log(`Received command: ${cmd}`);
+    const name = args.shift().toLowerCase();
+    console.log(`Received command: ${name}`);
 
-    // Process the command
-    switch(cmd) {
-        case "list":
-            const list = kaomojis.join("\n");
-            msg.channel.send(`Available kaomojis:\`\`\`\n${list}\n\`\`\``);
-            break;
-        case "randomoji":
-            const idx = Math.floor(Math.random() * kaomojis.length);
-            msg.channel.send(kaomojis[idx]);
-            break;
-        case "latency":
-        case "delay":
-        case "ping":
-            const output = await msg.channel.send("Waiting for response to ping..");
-            const latency = output.createdTimestamp - msg.createdTimestamp;
-            output.edit(`Bot latency is ${latency}ms, API latency is ${client.ping}ms`);
-            break;
-    };
+    // Find the command module and call it
+    const command = commands[name];
+    if(command) command(msg, args, client); 
 });
 
+// Handle server join
+client.on("guildCreate", guild => {
+    console.log(`Bot joined ${guild.name} with ${guild.memberCount} members`);
+    console.log(`Now serving ${client.guilds.size} servers`);
+});
+  
+// Handle server leave
+client.on("guildDelete", guild => {
+    console.log(`Bot left ${guild.name}`);
+    console.log(`Now serving ${client.guilds.size} servers`);
+});
+
+// Start the bot
 client.login(process.env.TOKEN);

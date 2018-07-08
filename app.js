@@ -1,21 +1,39 @@
 const Discord = require('discord.js');
 const fs = require("fs");
+const path = require('path');
+const {promisify} = require('util');
+
+const readdir = promisify(fs.readdir);
+
+// Load environment variables from .env file
 require('dotenv').config();
 
 const client = new Discord.Client();
 const prefix = process.env.PREFIX;
+let commands = [];
 let kaomojis = [];
 
-client.on("ready", () => {
+client.on("ready", async () => {
     console.log(`Bot started with ${client.users.size} users on ${client.guilds.size} servers!`);
     client.user.setActivity(process.env.STATUS, {
         type: "WATCHING"
     });
 
+    const dirname = `${__dirname}/commands`;
+
+    let files = await readdir(dirname);
+    files.forEach(file => {
+        const obj = require(`${dirname}/${file}`);
+        const command = (...args) => obj.run(...args);
+        Object.assign(command, obj);
+        delete command.run; // Run is no longer needed
+        commands[command.alias] = command;
+    });
+
     // Load available kaomojis
-    fs.readFile(__dirname + "/kaomojis.txt", "utf8", (err, contents) => {
+    fs.readFile(__dirname + "/kaomojis.txt", "utf8", (err, content) => {
         if(err) throw err;
-        kaomojis = contents.split("\n");
+        kaomojis = content.split("\n");
     });
 });
 

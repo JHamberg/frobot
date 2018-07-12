@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const fsp = require("./io/fsp");
-const {promisify} = require('util');
+const guildService = require("./guilds.js");
 
 // Load environment variables from .env file
 require('dotenv').config();
@@ -8,7 +8,7 @@ require('dotenv').config();
 const client = new Discord.Client();
 const prefix = process.env.PREFIX;
 let commands = [];
-let guildcommands = [];
+let guilds;
 
 // Execute when bot is loaded
 client.on("ready", async () => {
@@ -28,23 +28,10 @@ client.on("ready", async () => {
         })
     });
 
-    // Load guild specific custom commands
-    const guilddir = `${__dirname}/guild_commands`;
-    let exists = await fsp.exists(guilddir);
-    if(!exists) await fsp.mkdir(guilddir);
-
-    client.guilds.forEach(async guild => {
-        const guildfile = `${guilddir}/${guild.name}-${guild.id}`;
-        const exists = await fsp.exists(guildfile);
-        if(!exists) {
-            // Make sure a file exists for each guild
-            const fd = await fsp.open(guildfile, "w");
-            await fsp.close(fd);
-        }
-        const content = await fsp.readFile(guildfile, "utf-8") || "{}";
-        const commands = JSON.parse(content);
-        guildcommands[guild.id] = commands;
-    });
+    // Initialize guild service (currently used for custom commands)
+    console.log("Initializing guild commands..");
+    guilds = await guildService.init(client.guilds);
+    console.log("Guild commands initialized!"); 
 });
 
 // Execute on message
@@ -65,13 +52,14 @@ client.on("message", async msg => {
         return;
     }
 
-    // Check custom commands if default no found
-    const guildcommand = guildcommands[msg.channel.guild.id];
-    if(!guildcommand) return;
-    const reply = guildcommand[name];
-    if(!reply) return; 
-
-    await msg.channel.send(reply);
+    // Check custom commands if no official one found
+    const guild  = msg.channel.guild.id;
+    const guildCommands = guilds.getCommands(guild);
+    if(guildCommands) { 
+        const output = guildCommands[name];
+        if(!output) return; 
+        await msg.channel.send(output);
+    }
 });
 
 // Handle server join

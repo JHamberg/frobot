@@ -1,16 +1,6 @@
 const Discord = require('discord.js');
-const fs = require("fs");
+const fsp = require("./io/fsp");
 const {promisify} = require('util');
-
-// Extended fs with promise functionality
-const fsp = {
-    readdir: promisify(fs.readdir),
-    mkdir: promisify(fs.mkdir),
-    exists: promisify(fs.exists),
-    readFile: promisify(fs.readFile),
-    open: promisify(fs.open),
-    close: promisify(fs.close)
-}
 
 // Load environment variables from .env file
 require('dotenv').config();

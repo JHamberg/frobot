@@ -1,7 +1,7 @@
 const guilds = require("../guilds.js");
 
 const addcommand = {
-    aliases: ["addcommand"],
+    aliases: ["addcommand", "add"],
     description: "Add a custom server-wide command. Usage: !addcommand <command> <output>",
     run: async (msg, args, client) => {
         const guild = msg.channel.guild;

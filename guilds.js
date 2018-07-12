@@ -32,8 +32,9 @@ const createIfNotExists = async (target, options={dir: false}) => {
     if(options.dir) {
         await fsp.mkdir(target);
     } else {
-        const fd = await fsp.mkdir(target);
+        const fd = await fsp.open(target, "w");
         await fsp.close(fd);
     }
 }
+
 module.exports = {init, addCommand, getCommands};

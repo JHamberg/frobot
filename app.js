@@ -23,6 +23,7 @@ client.on("ready", async () => {
         Object.assign(command, obj);
         delete command.run; // Run is no longer needed
         command.aliases.forEach(alias => {
+            console.log(`Loading command: ${alias}`);
             commands[alias] = command;
         })
     });

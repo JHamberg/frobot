@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const fsp = require("./io/fsp");
-const guildService = require("./guilds.js");
+const guilds = require("./guilds.js");
 
 // Load environment variables from .env file
 require('dotenv').config();
@@ -8,7 +8,6 @@ require('dotenv').config();
 const client = new Discord.Client();
 const prefix = process.env.PREFIX;
 let commands = [];
-let guilds;
 
 // Execute when bot is loaded
 client.on("ready", async () => {
@@ -29,9 +28,8 @@ client.on("ready", async () => {
     });
 
     // Initialize guild service (currently used for custom commands)
-    console.log("Initializing guild commands..");
-    guilds = await guildService.init(client.guilds);
-    console.log("Guild commands initialized!"); 
+    await guilds.init(client.guilds);
+    console.log("All commands loaded, ready to rock!");
 });
 
 // Execute on message
@@ -53,7 +51,7 @@ client.on("message", async msg => {
     }
 
     // Check custom commands if no official one found
-    const guild  = msg.channel.guild.id;
+    const guild = msg.channel.guild;
     const guildCommands = guilds.getCommands(guild);
     if(guildCommands) { 
         const output = guildCommands[name];

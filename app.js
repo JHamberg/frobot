@@ -20,7 +20,12 @@ client.on("ready", async () => {
     files.forEach(file => {
         const obj = require(`${dirname}/${file}`);
         const command = (...args) => obj.run(...args);
+        command.enabled = true;
+
+        // Import fields from command object into the function
         Object.assign(command, obj);
+        if(!command.enabled) return;
+
         delete command.run; // Run is no longer needed
         command.aliases.forEach(alias => {
             console.log(`Loading command: ${alias}`);
@@ -74,4 +79,4 @@ client.on("guildDelete", guild => {
 });
 
 // Start the bot
-client.login(process.env.TOKEN);
+client.login(process.env.DISCORD_TOKEN);

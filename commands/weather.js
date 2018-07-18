@@ -8,6 +8,7 @@ const weather = {
     enabled: !!process.env.OWM_TOKEN,
     run: async (msg, args, client) => {
         if (!args || args.length < 1) return;
+        const output = await msg.channel.send(":hourglass: Loading weather data…");
         const city = args.join(" ");
         const overwrites = guilds.getLocations(msg.channel.guild);
         const overwrite = overwrites[city];
@@ -36,7 +37,7 @@ const weather = {
         const status = format(response);
 
         // TODO: Fix sunrise and sunset daylight savings offset  
-        await msg.channel.send([
+        await output.edit([
             `${status.icon} ${status.description} ${status.temp}\n`,
             `:dash: ${status.wind} ${status.direction}\n`,
             `:scales: Pressure: ${status.pressure}\n`,

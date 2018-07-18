@@ -6,19 +6,21 @@ const weather = {
     description: "Access the current weather data for a given location",
     enabled: !!process.env.OWM_TOKEN,
     run: async (msg, args, client) => {
-        if(!args || args.length < 2) return;
-        const [latitude, longitude] = args;
+        if(!args || args.length < 1) return;
+        const city = args[0];
+
         const options = {
             url: "https://api.openweathermap.org/data/2.5/weather",
             json: true, 
             qs: {
-                lat: latitude,
-                lon: longitude,
+                q: encodeURI(city),
                 units: "metric",
                 type: "accurate",
                 appid: process.env.OWM_TOKEN
             }
         }
+
+        // Coordinates
         const response = await request(options);
         const status = format(response);
 
@@ -32,12 +34,13 @@ const weather = {
     }
 }
 
+// Destructure the somewhat complex json response
 const format = (response) => { 
     const weather = response.weather[0];
     const icon = icons[`i${weather.icon}`];
     const {temp, pressure, humidity} = response.main;
     const {sunrise, sunset} = response.sys;
-    
+
     return {
         icon: utils.emojify(icon),
         description: utils.capitalize(weather.description),
@@ -51,6 +54,7 @@ const format = (response) => {
     }
 }
 
+// Icon to emoji translation table
 const icons = {
     i01d: "sunny",
     i02d: "partly_sunny",

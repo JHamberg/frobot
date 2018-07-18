@@ -1,7 +1,7 @@
 const request = require("request-promise-native");
 
-const giphy = {
-    aliases: ["giphy", "gif", "webm"],
+const gif = {
+    aliases: ["gif", "webm"],
     description: "Look up a random GIF from Giphy",
     enabled: !!process.env.GIPHY_TOKEN, // Need an API key for this command
     run: async (msg, args, client) => {
@@ -20,4 +20,4 @@ const giphy = {
     }
 }
 
-module.exports = giphy;
+module.exports = gif;

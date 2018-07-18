@@ -1,4 +1,5 @@
 const utils = require("../utils");
+const guilds = require("../guilds.js");
 const request = require("request-promise-native");
 
 const weather = {
@@ -6,18 +7,28 @@ const weather = {
     description: "Access the current weather data for a given location",
     enabled: !!process.env.OWM_TOKEN,
     run: async (msg, args, client) => {
-        if(!args || args.length < 1) return;
-        const city = args[0];
+        if (!args || args.length < 1) return;
+        const city = args.join(" ");
+        const overwrites = guilds.getLocations(msg.channel.guild);
+        const overwrite = overwrites[city];
 
+        // Create the basic query structure 
         const options = {
             url: "https://api.openweathermap.org/data/2.5/weather",
             json: true, 
             qs: {
-                q: encodeURI(city),
                 units: "metric",
                 type: "accurate",
                 appid: process.env.OWM_TOKEN
             }
+        }
+
+        // Check if the location has been overwritten
+        if (overwrite) {
+            options.qs.lat = overwrite.latitude;
+            options.qs.lon = overwrite.longitude;
+        } else {
+            options.qs.q = encodeURI(city);
         }
 
         // Coordinates

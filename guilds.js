@@ -1,28 +1,40 @@
 const fsp = require("./io/fsp.js");
-const commands = {};
+const guilds = {};
 
 const dir = `${__dirname}/guild_commands`;
 const getFilePath = (guild) => `${dir}/${guild.name}-${guild.id}`;
-const getCommands = (guild) => commands[guild.id];
+const getGuilds = () => guilds;
+const getCommands = (guild) => guilds[guild.id].commands;
+const getLocations = (guild) => guilds[guild.id].locations;
+const defaultStructure = {commands: {}, locations: {}};
 
-const init = async (guilds) => {
-    guilds.forEach(async guild => {
+const init = async (servers) => {
+    servers.forEach(async guild => {
         const file = getFilePath(guild);
         await createIfNotExists(dir, {dir: true});
         await createIfNotExists(file);
 
-        const content = await fsp.readFile(file, "utf-8") || "{}";
-        commands[guild.id] = JSON.parse(content);
+        const content = await fsp.readFile(file, "utf-8");
+        guilds[guild.id] = content ? JSON.parse(content) : defaultStructure;
     });
 }
 
 const addCommand = async (guild, command, output) => {
-    const list = commands[guild.id];
+    const list = guilds[guild.id].commands;
     if(list[command]) throw "This command already exists";
+    guilds[guild.id].commands[command] = output;
+    await save(guild);
+}
 
-    list[command] = output;
+const addLocation = async (guild, name, location) => {
+    // For now, allow overwrites
+    guilds[guild.id].locations[name] = location; 
+    await save(guild);
+}
+
+const save = async (guild) => {
     const file = getFilePath(guild);
-    await fsp.writeFile(file, JSON.stringify(list));
+    await fsp.writeFile(file, JSON.stringify(guilds[guild.id], null, 2));
 }
 
 // This should eventually reside somewhere else
@@ -37,4 +49,4 @@ const createIfNotExists = async (target, options={dir: false}) => {
     }
 }
 
-module.exports = {init, addCommand, getCommands};
+module.exports = {init, addCommand, getCommands, addLocation, getLocations, getGuilds};

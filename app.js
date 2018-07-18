@@ -1,39 +1,21 @@
 const Discord = require('discord.js');
 const fsp = require("./io/fsp");
 const guilds = require("./guilds.js");
+const commands = require("./commands.js");
 
 // Load environment variables from .env file
 require('dotenv').config();
 
 const client = new Discord.Client();
 const prefix = process.env.PREFIX;
-let commands = [];
 
 // Execute when bot is loaded
 client.on("ready", async () => {
     console.log(`Bot started with ${client.users.size} users on ${client.guilds.size} servers!`);
     client.user.setActivity(process.env.STATUS, {type: "WATCHING"});
 
-    // Load commands dynamically from respective files 
-    const dirname = `${__dirname}/commands`;
-    const files = await fsp.readdir(dirname);
-    files.forEach(file => {
-        const obj = require(`${dirname}/${file}`);
-        const command = (...args) => obj.run(...args);
-        command.enabled = true;
-
-        // Import fields from command object into the function
-        Object.assign(command, obj);
-        if(!command.enabled) return;
-
-        delete command.run; // Run is no longer needed
-        command.aliases.forEach(alias => {
-            console.log(`Loading command: ${alias}`);
-            commands[alias] = command;
-        })
-    });
-
-    // Initialize guild service (currently used for custom commands)
+    // Initialize global and guild-specific commands
+    await commands.init();
     await guilds.init(client.guilds);
     console.log("All commands loaded, ready to rock!");
 });
@@ -50,7 +32,7 @@ client.on("message", async msg => {
     console.log(`Received command: ${name}`);
 
     // Find the command module and call it
-    const command = commands[name];
+    const command = commands.get(name);
     if(command) {
         command(msg, args, client);
         return;

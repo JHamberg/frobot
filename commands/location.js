@@ -2,7 +2,7 @@ const guilds = require("../guilds.js");
 
 const location = {
     aliases: ["location", "place"],
-    description: "Allows adding custom locations for the !weather command",
+    description: "Allows adding custom locations for the command",
     run: async (msg, args, client) => {
         if (!args || args.length < 1) throw "Invalid arguments!";
         const guild = msg.channel.guild;

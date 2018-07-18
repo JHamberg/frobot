@@ -9,7 +9,7 @@ const weather = {
     run: async (msg, args, client) => {
         if (!args || args.length < 1) return;
         const output = await msg.channel.send(":hourglass: Loading weather data…");
-        const city = args.join(" ");
+        const city = args.join(" ").toLowerCase();
         const overwrites = guilds.getLocations(msg.channel.guild);
         const overwrite = overwrites[city];
 

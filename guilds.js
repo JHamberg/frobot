@@ -27,7 +27,7 @@ const addCommand = async (guild, command, output) => {
 }
 
 const addLocation = async (guild, name, location) => {
-    // For now, allow overwrites
+    // For now, allow overwrites to existing locations
     guilds[guild.id].locations[name] = location; 
     await save(guild);
 }

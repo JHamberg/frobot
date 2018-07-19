@@ -76,7 +76,16 @@ const icons = {
     i10d: "white_sun_rain_cloud",
     i11d: "thunder_cloud_rain",
     i13d: "cloud_snow",
-    i50d: "foggy"
+    i50d: "foggy",
+    i01n: "night_with_stars",
+    i02n: "cloud",
+    i03n: "cloud",
+    i04n: "cloud",
+    i09n: "cloud_rain",
+    i10n: "cloud_rain",
+    i11n: "thunder_cloud_rain",
+    i13n: "cloud_snow",
+    i50n: "foggy"
 }
 
 module.exports = weather;

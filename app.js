@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-const fsp = require("./io/fsp");
 const guilds = require("./guilds.js");
 const commands = require("./commands.js");
 
@@ -23,8 +22,8 @@ client.on("ready", async () => {
 // Execute on message
 client.on("message", async msg => {
     // Ignore messages from other bots and/or without prefix
-    if(msg.author.bot) return;
-    if(!msg.content.includes(prefix)) return;
+    if (msg.author.bot) return;
+    if (!msg.content.includes(prefix)) return;
     
     // Split the command from its arguments
     const args = msg.content.slice(prefix.length).trim().split(/ +/g);
@@ -33,17 +32,15 @@ client.on("message", async msg => {
 
     // Find the command module and call it
     const command = commands.get(name);
-    if(command) {
+    if (command) {
         command(msg, args, client);
         return;
     }
 
     // Check custom commands if no official one found
     const guild = msg.channel.guild;
-    const guildCommands = guilds.getCommands(guild);
-    if(guildCommands) { 
-        const output = guildCommands[name];
-        if(!output) return; 
+    const output = guilds.getCommand(guild, name);
+    if (output) {
         await msg.channel.send(output);
     }
 });

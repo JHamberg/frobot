@@ -4,6 +4,7 @@ const guilds = {};
 const dir = `${__dirname}/guild_commands`;
 const getFilePath = (guild) => `${dir}/${guild.name}-${guild.id}`;
 const getGuilds = () => guilds;
+const getCommand = (guild, name) => guilds[guild.id].commands[name];
 const getCommands = (guild) => guilds[guild.id].commands;
 const getLocations = (guild) => guilds[guild.id].locations;
 const defaultStructure = {commands: {}, locations: {}};
@@ -49,4 +50,4 @@ const createIfNotExists = async (target, options={dir: false}) => {
     }
 }
 
-module.exports = {init, addCommand, getCommands, addLocation, getLocations, getGuilds};
+module.exports = {init, addCommand, getCommands, addLocation, getLocations, getGuilds, getCommand};

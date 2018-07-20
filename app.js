@@ -32,7 +32,7 @@ client.on("message", async msg => {
 
     // Find the command module and call it
     const command = commands.get(name);
-    if (command) {
+    if(command) {
         command(msg, args, client);
         return;
     }
@@ -46,7 +46,8 @@ client.on("message", async msg => {
 });
 
 // Handle server join
-client.on("guildCreate", guild => {
+client.on("guildCreate", async guild => {
+    await guilds.load(guild);
     console.log(`Bot joined ${guild.name} with ${guild.memberCount} members`);
     console.log(`Now serving ${client.guilds.size} servers`);
 });

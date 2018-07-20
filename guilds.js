@@ -10,14 +10,16 @@ const getLocations = (guild) => guilds[guild.id].locations;
 const defaultStructure = {commands: {}, locations: {}};
 
 const init = async (servers) => {
-    servers.forEach(async guild => {
-        const file = getFilePath(guild);
-        await createIfNotExists(dir, {dir: true});
-        await createIfNotExists(file);
+    await servers.forEach(load);
+}
 
-        const content = await fsp.readFile(file, "utf-8");
-        guilds[guild.id] = content ? JSON.parse(content) : defaultStructure;
-    });
+const load = async (guild) => {
+    const file = getFilePath(guild);
+    await createIfNotExists(dir, {dir: true});
+    await createIfNotExists(file);
+
+    const content = await fsp.readFile(file, "utf-8");
+    guilds[guild.id] = content ? JSON.parse(content) : defaultStructure;
 }
 
 const addCommand = async (guild, command, output) => {
@@ -50,4 +52,4 @@ const createIfNotExists = async (target, options={dir: false}) => {
     }
 }
 
-module.exports = {init, addCommand, getCommands, addLocation, getLocations, getGuilds, getCommand};
+module.exports = {init, load, addCommand, getCommands, addLocation, getLocations, getGuilds, getCommand};

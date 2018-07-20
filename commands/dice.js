@@ -27,7 +27,7 @@ const dist = (rolls) => {
     const counts = utils.countByIdentity(rolls);
     return Object.entries(counts).map(([face, count]) => {
         const percentage = utils.round(count / rolls.length * 100, 2);
-        return `**[${face}]**: ${count} (${percentage}%)`;
+        return `**${face}**: ${count} (${percentage}%)`;
     });
 }
 

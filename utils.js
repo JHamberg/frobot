@@ -29,7 +29,7 @@ const utils = {
     },
     dist: (arr, format = distFormat, precision = 2) => {
         const counts = utils.countByIdentity(arr);
-        return Object.entries(counts).map(([elem, count]) => {
+        return Object.entries(counts).sort().map(([elem, count]) => {
             const percentage = utils.round(count / arr.length * 100, precision);
             return format(elem, count, percentage);
         });

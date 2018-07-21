@@ -1,4 +1,4 @@
-const utils = require("../utils");
+const {capitalize, clockify, emojify, compassify} = require("../utils");
 const guilds = require("../guilds.js");
 const request = require("request-promise-native");
 
@@ -8,6 +8,7 @@ const weather = {
     enabled: !!process.env.OWM_TOKEN,
     run: async (msg, args, client) => {
         if (!args || args.length < 1) return;
+
         const output = await msg.channel.send(":hourglass: Loading weather data…");
         const city = args.join(" ").toLowerCase();
         const overwrites = guilds.getLocations(msg.channel.guild);
@@ -54,15 +55,15 @@ const format = (response) => {
     const {sunrise, sunset} = response.sys;
 
     return {
-        icon: utils.emojify(icon),
-        description: utils.capitalize(weather.description),
+        icon: emojify(icon),
+        description: capitalize(weather.description),
         temp: `${temp} °C`,
         pressure: `${pressure} hPa`,
         humidity: `${humidity}%`,
         wind: `${response.wind.speed} m/s`,
-        direction: utils.compassify(response.wind.deg),
-        sunrise: utils.clockify(sunrise*1000),
-        sunset: utils.clockify(sunset*1000)
+        direction: compassify(response.wind.deg),
+        sunrise: clockify(sunrise*1000),
+        sunset: clockify(sunset*1000)
     }
 }
 

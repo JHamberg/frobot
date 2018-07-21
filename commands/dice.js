@@ -1,5 +1,5 @@
 const random = require("../random.js");
-const utils = require("../utils.js");
+const {fill, dist, bold} = require("../utils.js");
 
 const dice = {
     aliases: ["dice", "throw", "roll", "rolls"],
@@ -10,10 +10,10 @@ const dice = {
 
         // Generate a uniform distribution of truly random rolls
         const amount = +args[0] || 1;
-        const rolls = utils.fill(amount, () => random.int256(1, 6));
+        const rolls = fill(amount, () => random.int256(1, 6));
 
         // Print distribution for more than 100 rolls
-        const results = rolls.length > 100 ? utils.dist(rolls) : rolls.map(utils.bold);
+        const results = rolls.length > 100 ? dist(rolls) : rolls.map(bold);
         await output.edit(`:game_die: **${author}** rolls ${results.join(", ")}.`);
     }
 }

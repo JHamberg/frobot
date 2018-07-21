@@ -8,11 +8,20 @@ const dice = {
         // Generate a uniform distribution of truly random rolls
         const output = await msg.channel.send(":hourglass: Rolling the dice…");
 
-        const rolls = Array(+args[0] || 1).fill().map(() => {
+        const amount = +args[0] || 1;
+        const rolls = Array(amount).fill().map(() => {
             const buffer = new Uint8Array(1);
-            const bytes = crypto.randomBytes(buffer.length);
-            buffer.set(bytes);
-            return bytes[0] % 6 + 1;
+
+            // Since six is not a power of two, we need rejection sampling    
+            let candidate;
+            do {
+                const bytes = crypto.randomBytes(buffer.length);
+                buffer.set(bytes);
+                candidate = bytes[0] % 8 + 1; // Power of two
+            } while (candidate > 6);
+
+            // Use the first random number in bounds
+            return candidate; 
         });
 
         // Summarize more than 100 rolls

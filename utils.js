@@ -1,4 +1,5 @@
 const cardinals = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+const distFormat = (elem, count, p) => `**${elem}**: ${count} (${p}%)`;
 
 const utils = {
     emojify: (str) => `:${str}:`,
@@ -26,6 +27,18 @@ const utils = {
             return res;
         }, {});
     },
+    dist: (arr, format = distFormat, precision = 2) => {
+        const counts = utils.countByIdentity(arr);
+        return Object.entries(counts).map(([elem, count]) => {
+            const percentage = utils.round(count / arr.length * 100, precision);
+            return format(elem, count, percentage);
+        });
+    },
+    fill: (times, obj) => {
+        return Array(times).fill().map(() => {
+            return typeof obj === "function" ? obj() : obj;
+        });
+    }
 }
 
 module.exports = utils;

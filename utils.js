@@ -2,6 +2,7 @@ const cardinals = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW",
 const distFormat = (elem, count, p) => `**${elem}**: ${count} (${p}%)`;
 
 const utils = {
+    identity: x => x,
     emojify: (str) => `:${str}:`,
     round: (num, n) => +(Math.round(`${num}e${n}`) + `e-${n}`),
     bold: (str) => `**${str}**`,

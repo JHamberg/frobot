@@ -6,6 +6,7 @@ const utils = {
     emojify: (str) => `:${str}:`,
     round: (num, n) => +(Math.round(`${num}e${n}`) + `e-${n}`),
     bold: (str) => `**${str}**`,
+    toEpoch: (date) => new Date(date).getTime(),
     capitalize: (str) => {
         return str[0].toUpperCase() + str.slice(1);
     },
@@ -39,6 +40,14 @@ const utils = {
         return Array(times).fill().map(() => {
             return typeof obj === "function" ? obj() : obj;
         });
+    },
+    timefy: (milliseconds) => {
+        let seconds = milliseconds / 1000;
+        const hours = parseInt(seconds / 3600);
+        seconds = seconds % 3600;
+        const minutes = parseInt(seconds / 60);
+        seconds = minutes % 60;
+        return [hours, minutes, seconds]; 
     }
 }
 

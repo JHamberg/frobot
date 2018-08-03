@@ -1,74 +1,76 @@
+const Discord = require('discord.js');
 const request = require("request-promise-native");
+const similarity = require("string-similarity");
 const moment = require("moment");
-const utils = require("../utils.js")
 
 const currentDate = new Date();
 const shortYear = currentDate.getFullYear().toString().substr(-2);
-const eventsUrl = "https://www.assembly.org/media/uploads/schedule/summer18/events.json";
-
-const notEnded = (event) => event.end > new Date().getTime();
-const ongoing = (event) => event.start < new Date().getTime();
-const upcoming = (event) => event.start > new Date().getTime();
-
-const format = (event) => {
-    const { name, location_key } = event;
-    const start = utils.toEpoch(event.start_time);
-    const end = utils.toEpoch(event.end_time);
-    return { name, start, end, location_key };
-}
+const url = `https://www.assembly.org/media/uploads/schedule/summer${shortYear}/events.json`;
 
 const assembly = {
     aliases: ["assembly", "asm"],
-    description: `Displays ongoing and upcoming events for Assembly${shortYear}`,
-    run: async (msg, args, client) => {
-        
-        const json = await request.get({url: eventsUrl, json: true});
-        const { locations, events } = json;
+    description: `Displays ongoing and upcoming events for #ASMPARTY${shortYear}`,
+    run: async (msg, args) => {
+        const { locations, events } = await request.get({ url, json: true });
+        let area = (args[0] || "stage").toLowerCase();
+        const count = args[1] || 5;
 
-        const location = args[0] || "stage";
-        let limited = location.toLowerCase() !== "all"
-            ? events.filter(event => event.location_key == location)
-            : events;
-        
-        if (!limited) {
-            await msg.channel.send(":x: Invalid event location!");
+        // Find the best fuzzy match if the location does not exist
+        if (!locations[area]) {
+            const { bestMatch } = similarity.findBestMatch(area, Object.keys(locations));
+            const { target, rating } = bestMatch;
+
+            // Minimum rating we can consider a match
+            if (rating < 0.3) {
+                await msg.channel.send(`:x: Failed to find area ${area}!`);
+                return;
+            }
+            area = target;
+        }
+
+        // Format and filter events of interest
+        const [ongoing, upcoming] = events.reduce((res, raw) => {
+            const [ongoing, upcoming] = res;
+            const { name, location_key: key, start_time, end_time } = raw;
+            const now = moment();
+
+            // Filter out events in the wrong area
+            if (key !== area) return res;
+
+            // Only include events that have not ended
+            if (moment(end_time).isAfter(now)) {
+                const start = moment(start_time);
+                const time = start.format("HH:mm");
+
+                // Separate ongoing and upcoming events
+                return start.isBefore(now)
+                    ? [[...ongoing, name], upcoming]
+                    : [ongoing, [...upcoming, `\`${time}\` - ${name}`]];
+            }
+
+            return res;
+        }, [[], []]);
+
+        // Exit early if there are no results
+        if ([ongoing, upcoming].every(arr => arr.length === 0)) {
+            await msg.channel.send(`:x: No events found for ${area}`);
             return;
         }
 
-        const active = limited.map(format).filter(notEnded);
-        const current = active.filter(ongoing);    
+        // Format the output as rich embed
+        const embed = new Discord.RichEmbed()
+            .setColor(0x6441A5)
+            .setAuthor("ASSEMBLY Summer 2018 - Schedule", "https://i.imgur.com/T3TyVku.png")
+            .setThumbnail("https://i.imgur.com/gzizQQ5.png")
+            .setTitle(`**${locations[area].name}**`)
+            .setURL(`https://www.assembly.org/summer${shortYear}/schedule`)
+            .addField("Ongoing", ongoing.length > 0 ? ongoing.join("\n") : "No current events.")
+            .addField("Upcoming", upcoming.length > 0 ? upcoming.slice(0, count).join("\n") : "No upcoming events")
+            .setTimestamp(new Date())
+            .setFooter("© ASSEMBLY");
 
-        let next;
-        if (current.length <= 1) {
-            const lowest = active
-                .filter(upcoming)
-                .reduce((prev, curr) => (prev.start < curr.start ? prev : curr), Infinity)
-            const { name, start } = lowest;
-            const time = moment(start).format("hh:mm");
-            next = { name, time };
-        }
-
-        const results = current.map(event => {
-            const { name, location_key } = event;
-            const location = locations[location_key].name;
-
-            const now = new Date().getTime();
-            const remaining = event.end - now;
-            const [hours, minutes] = utils.timefy(remaining);
-
-            return hours !== 0 
-                ? `**${name}** \n${location} (${hours}h ${minutes}min remaining)`
-                : `**${name}** \n${location} (${minutes}min remaining)`;
-        })
-
-        let output = results.join("\n\n"); 
-        if (next) {
-            output = output ? `${output}\n\n` : ""; 
-            output = `${output}**Next event at ${next.time}**:\n${next.name}`;
-        }
-
-        await msg.channel.send(output);
+        await msg.channel.send({ embed });
     }
-}
+};
 
 module.exports = assembly;

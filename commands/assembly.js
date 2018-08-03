@@ -59,7 +59,7 @@ const assembly = {
 
         // Format the output as rich embed
         const embed = new Discord.RichEmbed()
-            .setColor(0x6441A5)
+            .setColor(0x000000)
             .setAuthor(`ASSEMBLY Summer ${year} - Schedule`, "https://i.imgur.com/T3TyVku.png")
             .setThumbnail("https://i.imgur.com/gzizQQ5.png")
             .setTitle(`**${locations[area].name}**`)

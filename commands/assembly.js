@@ -3,8 +3,8 @@ const request = require("request-promise-native");
 const similarity = require("string-similarity");
 const moment = require("moment");
 
-const currentDate = new Date();
-const shortYear = currentDate.getFullYear().toString().substr(-2);
+const year = new Date().getFullYear();
+const shortYear = year.toString().substr(-2);
 const url = `https://www.assembly.org/media/uploads/schedule/summer${shortYear}/events.json`;
 
 const assembly = {
@@ -60,7 +60,7 @@ const assembly = {
         // Format the output as rich embed
         const embed = new Discord.RichEmbed()
             .setColor(0x6441A5)
-            .setAuthor("ASSEMBLY Summer 2018 - Schedule", "https://i.imgur.com/T3TyVku.png")
+            .setAuthor(`ASSEMBLY Summer ${year} - Schedule`, "https://i.imgur.com/T3TyVku.png")
             .setThumbnail("https://i.imgur.com/gzizQQ5.png")
             .setTitle(`**${locations[area].name}**`)
             .setURL(`https://www.assembly.org/summer${shortYear}/schedule`)

@@ -20,11 +20,11 @@ client.on("ready", async () => {
 });
 
 // Execute on message
-client.on("message", async msg => {
+client.on("message", async (msg) => {
     // Ignore messages from other bots and/or without prefix
     if (msg.author.bot) return;
     if (!msg.content.includes(prefix)) return;
-    
+
     // Split the command from its arguments
     const args = msg.content.slice(prefix.length).trim().split(/ +/g);
     const name = args.shift().toLowerCase();
@@ -32,13 +32,13 @@ client.on("message", async msg => {
 
     // Find the command module and call it
     const command = commands.get(name);
-    if(command) {
+    if (command) {
         command(msg, args, client);
         return;
     }
 
     // Check custom commands if no official one found
-    const guild = msg.channel.guild;
+    const { guild } = msg.channel;
     const output = guilds.getCommand(guild, name);
     if (output) {
         await msg.channel.send(output);
@@ -46,14 +46,14 @@ client.on("message", async msg => {
 });
 
 // Handle server join
-client.on("guildCreate", async guild => {
+client.on("guildCreate", async (guild) => {
     await guilds.load(guild);
     console.log(`Bot joined ${guild.name} with ${guild.memberCount} members`);
     console.log(`Now serving ${client.guilds.size} servers`);
 });
-  
+
 // Handle server leave
-client.on("guildDelete", guild => {
+client.on("guildDelete", (guild) => {
     console.log(`Bot left ${guild.name}`);
     console.log(`Now serving ${client.guilds.size} servers`);
 });

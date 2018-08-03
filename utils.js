@@ -7,6 +7,7 @@ const utils = {
     round: (num, n) => +(Math.round(`${num}e${n}`) + `e-${n}`),
     bold: (str) => `**${str}**`,
     toEpoch: (date) => new Date(date).getTime(),
+    sortByKey: (arr, key) => arr.sort((a, b) => a[key] - b[key]),
     capitalize: (str) => {
         return str[0].toUpperCase() + str.slice(1);
     },
@@ -48,7 +49,7 @@ const utils = {
         const minutes = parseInt(seconds / 60);
         seconds = minutes % 60;
         return [hours, minutes, seconds]; 
-    }
+    },
 }
 
 module.exports = utils;

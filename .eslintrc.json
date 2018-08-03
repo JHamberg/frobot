@@ -6,6 +6,7 @@
         "quote-props": [1, "consistent-as-needed"],
         "no-console": 0,
         "comma-dangle": [2, "never"],
-        "camelcase": [2, {"ignoreDestructuring": true}]
+        "camelcase": [2, {"ignoreDestructuring": true}],
+        "object-curly-newline": [2, {"minProperties": 5}]
     }
 }

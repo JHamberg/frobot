@@ -17,6 +17,7 @@ const assembly = {
 
         // Find the best fuzzy match if the location does not exist
         if (!locations[area]) {
+            // Under the hood, this uses Sørensen–Dice coefficient
             const { bestMatch } = similarity.findBestMatch(area, Object.keys(locations));
             const { target, rating } = bestMatch;
 
@@ -65,7 +66,7 @@ const assembly = {
             .setTitle(`**${locations[area].name}**`)
             .setURL(`https://www.assembly.org/summer${shortYear}/schedule`)
             .addField("Ongoing", ongoing.length > 0 ? ongoing.join("\n") : "No current events.")
-            .addField("Upcoming", upcoming.length > 0 ? upcoming.slice(0, count).join("\n") : "No upcoming events")
+            .addField("Upcoming", upcoming.length > 0 ? upcoming.slice(0, count).join("\n") : "No upcoming events.")
             .setTimestamp(new Date())
             .setFooter("© ASSEMBLY");
 

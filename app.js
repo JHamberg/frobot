@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const similarity = require("string-similarity");
 const guilds = require("./guilds.js");
 const commands = require("./commands.js");
 
@@ -11,7 +12,7 @@ const prefix = process.env.PREFIX;
 // Execute when bot is loaded
 client.on("ready", async () => {
     console.log(`Bot started with ${client.users.size} users on ${client.guilds.size} servers!`);
-    client.user.setActivity(process.env.STATUS, {type: "WATCHING"});
+    client.user.setActivity(process.env.STATUS, { type: "WATCHING" });
 
     // Initialize global and guild-specific commands
     await commands.init();
@@ -42,7 +43,20 @@ client.on("message", async (msg) => {
     const output = guilds.getCommand(guild, name);
     if (output) {
         await msg.channel.send(output);
+        return;
     }
+
+    // Try to suggest a fuzzy match when the command is not found
+    const candidates = Object.keys(commands.getAll());
+    const { bestMatch } = similarity.findBestMatch(name, candidates);
+    const { target: suggestion, rating } = bestMatch;
+    console.log(`${suggestion} at ${rating}`);
+
+    const error = rating < 0.3 // Only accept sensible suggestions
+        ? `:warning: Command **${name}** not found. Try again.`
+        : `:bulb: Did you mean **${suggestion}**?`;
+
+    await msg.channel.send(error);
 });
 
 // Handle server join

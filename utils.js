@@ -50,6 +50,13 @@ const utils = {
         seconds = minutes % 60;
         return [hours, minutes, seconds]; 
     },
+    acronym: long => (
+        long.replace(/[-_]/g, ' ')
+            .replace(/[^A-Za-z0-9\s]/g, '')
+            .split(' ')
+            .map(x => x[0])
+            .join('')
+    )
 }
 
 module.exports = utils;

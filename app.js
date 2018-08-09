@@ -24,7 +24,7 @@ client.on("ready", async () => {
 client.on("message", async (msg) => {
     // Ignore messages from other bots and/or without prefix
     if (msg.author.bot) return;
-    if (!msg.content.includes(prefix)) return;
+    if (!msg.content.startsWith(prefix)) return;
 
     // Split the command from its arguments
     const args = msg.content.slice(prefix.length).trim().split(/ +/g);

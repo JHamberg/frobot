@@ -63,7 +63,7 @@ const assembly = {
             .setColor(0x000000)
             .setAuthor(`ASSEMBLY Summer ${year} - Schedule`, "https://i.imgur.com/T3TyVku.png")
             .setThumbnail("https://i.imgur.com/gzizQQ5.png")
-            .setTitle(`**${locations[area].name}**`)
+            .setTitle(`${locations[area].name}`)
             .setURL(`https://www.assembly.org/summer${shortYear}/schedule`)
             .addField("Ongoing", ongoing.length > 0 ? ongoing.join("\n") : "No current events.")
             .addField("Upcoming", upcoming.length > 0 ? upcoming.slice(0, count).join("\n") : "No upcoming events.")
